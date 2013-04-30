@@ -10,7 +10,7 @@
 * @param height
 */
 var Board = Class.create({
-  initialize : function(width, height){
+	initialize : function(width, height){
 		this.width = width;
 		this.height = height;
 		this.board = undefined;
@@ -71,6 +71,8 @@ var Bubble = Class.create({
 		this.left = left;
 		this.top = top;
 		this.bubble = undefined;
+		this.vel_x = 0;
+		this.vel_y = 0;
 	},
 	
 	
@@ -145,28 +147,17 @@ var Bubble = Class.create({
 					var coordUtils = new CoordUtils(owner.leftCss(), bubbles[j].leftCss(), owner.topCss(), bubbles[j].topCss());
 					var dx = (coordUtils.right + 25) - (coordUtils.left + 25);
 					var dy = (coordUtils.top + 25) - (coordUtils.bottom + 25);
-					var distance = Math.sqrt(dx * dx + dy * dy);
-					
+					var distance = dx * dx + dy * dy;
+					var smoother = 4;
 					if (coordUtils.left + 50 > coordUtils.right && coordUtils.left < coordUtils.right + 50 && 
 							coordUtils.top + 50 > coordUtils.bottom && coordUtils.top < coordUtils.bottom + 50){
-						if( distance < 50 ){
-							var pos1_x = 0.5 * (1 + 50) / 50;
-							var pos1_y = 2 * pos1_x;
-							var pos2_x = 3 * pos1_x;
-							var pos2_y = 4 * pos1_y;
-							if( owner.leftCss() < bubbles[j].leftCss() && owner.topCss() < bubbles[j].topCss() ){
-								animation.moveBubble(-pos1_x,-pos1_y);
-								animations[j].moveBubble(pos2_x,pos2_y);
-							} else if ( owner.leftCss() < bubbles[j].leftCss() && owner.topCss() > bubbles[j].topCss() ){
-								animation.moveBubble(-pos1_x,pos1_y);
-								animations[j].moveBubble(pos2_x,-pos2_y);
-							} else if ( owner.leftCss() > bubbles[j].leftCss() && owner.topCss() < bubbles[j].topCss() ){
-								animation.moveBubble(pos1_x,-pos1_y);
-								animations[j].moveBubble(-pos2_x,pos2_y);
-							} else if ( owner.leftCss() > bubbles[j].leftCss() && owner.topCss() > bubbles[j].topCss() ){
-								animation.moveBubble(pos1_x, pos1_y);
-								animations[j].moveBubble(-pos2_x,-pos2_y);
-							}
+						if( distance <  50 * 50 ){
+							var pos1_x = ((owner.leftCss() + 25) - (bubbles[j].leftCss() +25))/smoother;
+							var pos1_y = ((owner.topCss() + 25) - (bubbles[j].topCss() + 25))/smoother;
+							var pos2_x = ((bubbles[j].leftCss() + 25) - (owner.leftCss() + 25))/smoother;
+							var pos2_y = ((bubbles[j].topCss() + 25) - (owner.topCss() + 25))/smoother;
+							animation.moveBubble(pos1_x,pos1_y);
+							animations[j].moveBubble(pos2_x,pos2_y);
 						} 
 					}
 				}
@@ -191,7 +182,7 @@ var Animation = new Class.create({
 	 * @param bubble
 	 */
 	initialize : function(bubble){
-		this.bubble = bubble;
+		this.bubble = bubble.get();
 		this.interval = undefined;
 	},
 	
@@ -205,7 +196,7 @@ var Animation = new Class.create({
 	moveBubble : function(dx, dy){
 		var current_x = Number(this.bubble.getStyle('left').replace('px', ''));
 		var current_y = Number(this.bubble.getStyle('top').replace('px', ''));
-		
+				
 		if( current_x + dx <= 0 ){
 			dx = 0.5;
 		} else if( current_x + dx >= 270){
