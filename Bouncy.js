@@ -71,8 +71,6 @@ var Bubble = Class.create({
 		this.left = left;
 		this.top = top;
 		this.bubble = undefined;
-		this.vel_x = 0;
-		this.vel_y = 0;
 	},
 	
 	
